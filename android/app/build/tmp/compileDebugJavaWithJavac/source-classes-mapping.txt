@@ -1,0 +1,14 @@
+com/scanner2020/BuildConfig.java
+ com.scanner2020.BuildConfig
+com/scanner2020/MainActivity.java
+ com.scanner2020.MainActivity
+com/scanner2020/ReactNativeFlipper.java
+ com.scanner2020.ReactNativeFlipper
+ com.scanner2020.ReactNativeFlipper$1
+ com.scanner2020.ReactNativeFlipper$2
+ com.scanner2020.ReactNativeFlipper$2$1
+com/scanner2020/MainApplication.java
+ com.scanner2020.MainApplication
+ com.scanner2020.MainApplication$1
+com/facebook/react/PackageList.java
+ com.facebook.react.PackageList
