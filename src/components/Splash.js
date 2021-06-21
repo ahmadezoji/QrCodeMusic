@@ -3,19 +3,17 @@ import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator } f
 
 export default class Splash extends React.Component {
     componentDidMount() {
-        this._bootstrapAsync();
+        setTimeout(() => {
+            this.props.navigation.navigate('Home',{username:''});
+        }, 2000);
     }
-  _bootstrapAsync = async () => {
-    // let _username = await AsyncStorage.getItem('username');
-    this.props.navigation.navigate('Home',{username:''});
-  };
     render() {
         return (
             <View style={{ flex: 1,flexDirection:'column',justifyContent:'center',alignItems:'center', backgroundColor: 'black' }}>
                 <StatusBar translucent backgroundColor="transparent" />
-                <Image style={{ height: 40,width:200 }}
-                    source={require('../assets/public/logotype.png')} />
-                <ActivityIndicator color='white' />
+                <Image style={{ height: '100%',width:'100%',position:'absolute',top:0,left:0,right:0,bottom:0 }}
+                    source={require('../assets/public/backgroundHome.jpeg')} />
+                <ActivityIndicator size={30} color='red' />
             </View>
         )
     }

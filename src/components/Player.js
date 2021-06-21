@@ -1,19 +1,9 @@
 import React from 'react';
 import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator } from 'react-native';
-// import { AudioPlayer } from 'react-native-simple-audio-player';
 import { AudioControls } from 'react-native-hue-player';
+import { MyColor } from './Colors';
 
-// let playlistSample = [
-//     {
-//         key: 'audio01',
-//         title: 'Ebi',
-//         url: 'http://dl.mokhtalefmusic.com/music/1397/07/03/ebi%20Khalij.mp3',
-//         author: 'Francisco Manuel da Silva',
-//         thumbnailUri: 'http://dl.abr.co.ir/tscobox/media/aquaman/home.png'
-//     },
-// ];
 export default class Player extends React.Component {
-    // http://dl.mokhtalefmusic.com/music/1397/07/03/ebi%20Khalij.mp3
     constructor(props) {
         super(props);
         this.player = null
@@ -22,7 +12,7 @@ export default class Player extends React.Component {
                 {
                     key: 'audio01',
                     title: 'Ebi',
-                    url: 'http://dl.mokhtalefmusic.com/music/1397/07/03/ebi%20Khalij.mp3',
+                    url: 'http://sv.naghmemusic.ir/ARCHIVE/D/Dariush/Dariush%20-%20Emrouz/05%20Vatan.mp3',
                     author: 'Francisco Manuel da Silva',
                     thumbnailUri: 'http://dl.abr.co.ir/tscobox/media/aquaman/home.png'
                 }
@@ -31,7 +21,10 @@ export default class Player extends React.Component {
     }
     componentDidMount() {
         // this.loadMusic();
-      
+    }
+    componentWillUnmount(){
+        // if(this.player!==null)
+            // this.player.pause();
     }
     async loadMusic(){
         let playlistSample =await [...this.state.playlistSample];
@@ -44,13 +37,13 @@ export default class Player extends React.Component {
 
     }
     render() {
-        console.log(this.state.playlistSample[0].url);
+        // console.log(this.state.playlistSample[0].url);
         return (
-            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
+            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: MyColor.blackTheme }}>
                 <StatusBar translucent backgroundColor="transparent" />
                 <AudioControls
                     ref={(ref)=>this.player=ref}
-                    activeColor={'#e82b28'}
+                    activeColor={'white'}
                     initialTrack={0} // starts on second audio file
                     playlist={this.state.playlistSample}
                 />

@@ -1,35 +1,62 @@
+import { Icon } from 'native-base';
 import React from 'react';
 import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator, TouchableOpacity, Linking, Text, StyleSheet } from 'react-native';
+import { RNCamera } from 'react-native-camera';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { MyColor } from './Colors';
 
 export default class Scanner extends React.Component {
-    componentDidMount() {
+    constructor(props) {
+        super(props);
+        this.scanner = null
+        this.state = {
+            front: false,
+            flashOn: false
+        };
+    }
+    componentDidUpdate() {
+        this.scanner.reactivate()
     }
     onSuccess = e => {
-        // this.props.navigation.navigate('player',{link:e.data});
-        console.log(e.data);
+        this.props.navigation.navigate('player', { link: e.data });
+        // this.scanner.reactivate();
+        // alert(e.data);
     };
     render() {
         return (
-            <View style={{ flex: 1, backgroundColor: MyColor.main_back }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: MyColor.blackTheme }}>
                 <StatusBar translucent backgroundColor="transparent" />
                 <QRCodeScanner
-                    containerStyle={{flex:1,alignItems:'center',justifyContent:'center',borderRadius:5}}
-                    cameraStyle={{width:300,height:300,borderRadius:5}}
+                    containerStyle={{ alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 0, left: 0, top: 0, bottom: 0 }}
+                    cameraStyle={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, borderRadius: 10, borderColor: 'yellow' }}
                     showMarker={true}
-                    fadeIn={true}
+                    // markerStyle={{width:100,height:100}}
+                    vibrate={true}
+                    customMarker={({ item }) => (
+                        <View style={{ height: 250, width: 250, borderColor: 'red', borderWidth: 3, borderRadius: 12 }}>
+                        </View>
+                    )}
+                    FlashMode={this.state.flashOn ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
                     onRead={this.onSuccess}
-                    // flashMode={RNCamera.Constants.FlashMode.torch}
-                    // topContent={
-                        
-                    // }
-                    bottomContent={
-                        <TouchableOpacity style={styles.buttonTouchable}>
-                            <Text style={styles.buttonText}>OK. Got it!</Text>
-                        </TouchableOpacity>
-                    }
+                    ref={(ref) => this.scanner = ref}
+
                 />
+                <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity style={{
+                        backgroundColor: MyColor.whiteTheme, width: 50, height: 50,
+                        marginBottom: 20, borderRadius: 5, alignItems: 'center', justifyContent: 'center', margin: 15
+                    }} onPress={() => setTimeout(() => {
+                        this.scanner.reactivate()
+                    }, 2000)}>
+                        <Icon style={{ fontSize: 40 }} type="MaterialCommunityIcons" name="lock-reset" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+                        backgroundColor: MyColor.whiteTheme, width: 50, height: 50,
+                        marginBottom: 20, borderRadius: 5, alignItems: 'center', justifyContent: 'center', margin: 15
+                    }} onPress={() => this.setState({ flashOn: !this.state.flashOn })}>
+                        <Icon style={{ fontSize: 40 }} type="FontAwesome" name="flash" />
+                    </TouchableOpacity>
+                </View>
             </View>
         )
     }

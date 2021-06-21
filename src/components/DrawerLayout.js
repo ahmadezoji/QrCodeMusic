@@ -28,7 +28,7 @@ export default class DrawerLayout extends React.Component {
             <View style={styles.container}>
                 <View style={{ backgroundColor: 'white', height: '20%', flexDirection: 'column', alignItems: 'flex-end' }}>
 
-                    <ImageBackground style={{ height: '100%', width: '100%', justifyContent: 'center' }} blurRadius={10} source={require('../assets/public/backDrawe.png')}>
+                    <ImageBackground style={{ height: '100%', width: '100%', justifyContent: 'center' }} blurRadius={10} source={require('../assets/public/backgroundHome.jpeg')}>
                         <View style={{ flexDirection: 'row-reverse' }}>
                             <Icon name="md-person-circle-sharp"
                                 style={{ color: 'black', fontSize: 40, alignItems: 'center' }} />

@@ -24,9 +24,9 @@ export default class App extends React.Component {
   constructor(props) {
       super(props);
 
-      var API_KEY = "2c597919-cb2c-43da-a16d-21706ba850b3";
+      var API_KEY = "159e5187-af4c-4e3d-9e85-9cac41b566b6";
 
-      var WEBSITE_ID = 20908; // get this from najva panel setting
+      var WEBSITE_ID = 27752; // get this from najva panel setting
 
       Najva.initializeNajva(API_KEY,WEBSITE_ID,true,false);
   }

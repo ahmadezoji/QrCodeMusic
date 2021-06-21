@@ -12,76 +12,122 @@ import Settings from './components/Settings';
 import Player from './components/Player';
 import Home from './components/Home';
 import Splash from './components/Splash';
+import { MyColor } from './components/Colors';
+import Info from './components/Info';
+import Store from './components/Store';
+import Help from './components/Help';
+import Share from 'react-native-share';
+const shareToFiles = async (link) => {
+    const shareOptions = {
+      title: 'Share file',
+      failOnCancel: false,
+      urls: [link],
+    };
+    // If you want, you can use a try catch, to parse
+    // the share response. If the user cancels, etc.
+    try {
+      const ShareResponse = await Share.open(shareOptions);
+      setResult(JSON.stringify(ShareResponse, null, 2));
+    } catch (error) {
+      console.log('Error =>', error);
+      setResult('error: '.concat(getErrorString(error)));
+    }
+  };
 
-
-
-const DetailStack = createStackNavigator(
+const PlayerStack = createStackNavigator(
     {
-        'player': { screen: Player},
+        'player': Player,
     },
     {
         defaultNavigationOptions: ({ navigation }) => ({
             headerTitle: '',
             headerTransparent: true,
             headerRight: () => (
-                <TouchableOpacity onPress={() => navigation.goBack(null)}>
-                    <Icon name="right"
-                        type="AntDesign"
-                        style={{ margin: 10, color: 'white', fontSize: 20 }}
+                <TouchableOpacity onPress={() => {
+                    // console.log(navigation.state.params.link);
+                    shareToFiles(navigation.state.params.link);
+                }}>
+                    <Icon name="share-alternative"
+                        type="Entypo"
+                        style={{color: 'white', fontSize: 25 }}
                     />
                 </TouchableOpacity>
             ),
         }),
     }
-    );
+);
+const StoreStack = createStackNavigator(
+    {
+        'store': Store,
+    },
+    {
+        defaultNavigationOptions: {
+            headerShown: true,
+            headerTitle: "فروشگاه",
+            headerTransparent: true,
+        },
+    }
+);
+const HelpStack = createStackNavigator(
+    {
+        'help': Help,
+    },
+    {
+        defaultNavigationOptions: {
+            headerShown: true,
+            headerTitle: "راهنما",
+            headerTransparent: true,
+        },
+    }
+);
 const TabNavigator = createMaterialBottomTabNavigator(
     {
         Scanner: {
             screen: Scanner,
             navigationOptions: {
-                tabBarLabel: 'اسکن',
+                tabBarLabel: 'QR Code',
                 tabBarIcon: ({ tintColor }) => (
                     <View>
-                        <Icon style={[{ color: tintColor }]} size={20} name={'search'} />
+                        <Icon style={[{ fontSize: 21, color: tintColor }]} name={'scan'} />
                     </View>),
-                activeColor: 'white',
+                activeColor: 'black',
                 inactiveColor: 'red',
-                barStyle: { backgroundColor: 'black' },
+                barStyle: { backgroundColor: MyColor.whiteTheme },
             }
         },
         Home: {
             screen: Home,
             navigationOptions: {
-                tabBarLabel: 'خانه',
+                tabBarLabel: 'Home',
                 tabBarIcon: ({ tintColor }) => (
                     <View>
-                        <Icon style={[{ color: tintColor }]} size={20} name={'home'} />
+                        <Icon style={[{ fontSize: 20, color: tintColor }]} name={'home'} />
                     </View>),
-                activeColor: 'white',
+                activeColor: 'black',
                 inactiveColor: 'red',
-                barStyle: { backgroundColor: 'black' },
+                barStyle: { backgroundColor: MyColor.whiteTheme },
             }
         },
 
-        Genres: {
-            screen: Player,
+        Info: {
+            screen: Info,
             navigationOptions: {
-                tabBarLabel: 'راهنما',
+                tabBarLabel: 'Info',
                 tabBarIcon: ({ tintColor }) => (
                     <View>
-                        <Icon style={{ fontSize: 21, color: tintColor }} type="FontAwesome5" name="theater-masks" />
+                        <Icon style={{ fontSize: 21, color: tintColor }} type="Entypo" name="info" />
                     </View>),
-                activeColor: 'white',
+                activeColor: 'black',
                 inactiveColor: 'red',
-                barStyle: { backgroundColor: 'black' },
+                barStyle: { backgroundColor: MyColor.whiteTheme },
             }
         },
     },
     {
         initialRouteName: "Home",
-        activeColor: 'white',
+        activeColor: 'black',
         inactiveColor: 'red',
-        barStyle: { backgroundColor: '#3BAD87' },
+        barStyle: { backgroundColor: '#1B0A34' },
     },
 );
 const DrawerNavigator = createDrawerNavigator(
@@ -95,8 +141,10 @@ const DrawerNavigator = createDrawerNavigator(
 );
 const MainStack = createStackNavigator(
     {
-        'Drawer': DrawerNavigator,
-        'Details': DetailStack,
+        'Main': DrawerNavigator,
+        'Player': PlayerStack,
+        'Store': StoreStack,
+        'Help': HelpStack
     },
     {
         defaultNavigationOptions: {
@@ -106,7 +154,8 @@ const MainStack = createStackNavigator(
 );
 const RootNavigator = createSwitchNavigator({
     'Splash': Splash,
-    'Main': MainStack
+    'Main': MainStack,
+
 
 
 }, {
