@@ -14,8 +14,7 @@ export default class Store extends React.Component {
     }
     render() {
         return (
-            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: MyColor.blackTheme }}>
-                <StatusBar translucent backgroundColor="transparent" />
+            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: MyColor.whiteTheme }}>
             </View>
         )
     }

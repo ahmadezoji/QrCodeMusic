@@ -4,7 +4,11 @@ import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator, To
 import { RNCamera } from 'react-native-camera';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { MyColor } from './Colors';
+import * as Animatable from "react-native-animatable";
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 
+console.disableYellowBox = true;
 export default class Scanner extends React.Component {
     constructor(props) {
         super(props);
@@ -14,69 +18,129 @@ export default class Scanner extends React.Component {
             flashOn: false
         };
     }
-    componentDidUpdate() {
-        this.scanner.reactivate()
-    }
     onSuccess = e => {
         this.props.navigation.navigate('player', { link: e.data });
-        // this.scanner.reactivate();
+        alert(e.data)
+        setTimeout(() => {
+            this.scanner.reactivate();
+        }, 6000);
         // alert(e.data);
     };
+    makeSlideOutTranslation(translationType, fromValue) {
+        return {
+            from: {
+                [translationType]: SCREEN_WIDTH * -0.18
+            },
+            to: {
+                [translationType]: fromValue
+            }
+        };
+    }
+
     render() {
         return (
-            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: MyColor.blackTheme }}>
-                <StatusBar translucent backgroundColor="transparent" />
-                <QRCodeScanner
-                    containerStyle={{ alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 0, left: 0, top: 0, bottom: 0 }}
-                    cameraStyle={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, borderRadius: 10, borderColor: 'yellow' }}
-                    showMarker={true}
-                    // markerStyle={{width:100,height:100}}
-                    vibrate={true}
-                    customMarker={({ item }) => (
-                        <View style={{ height: 250, width: 250, borderColor: 'red', borderWidth: 3, borderRadius: 12 }}>
+            <QRCodeScanner
+                ref={(ref) => this.scanner = ref}
+                showMarker
+                onRead={this.onSuccess.bind(this)}
+                cameraStyle={{ height: SCREEN_HEIGHT }}
+                customMarker={
+                    <View style={styles.rectangleContainer}>
+                        <View style={styles.topOverlay}>
+                            <Text style={{ fontSize: 25, color: "white" }}>
+                                QR CODE
+                  </Text>
                         </View>
-                    )}
-                    FlashMode={this.state.flashOn ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
-                    onRead={this.onSuccess}
-                    ref={(ref) => this.scanner = ref}
 
-                />
-                <View style={{ flexDirection: 'row' }}>
-                    <TouchableOpacity style={{
-                        backgroundColor: MyColor.whiteTheme, width: 50, height: 50,
-                        marginBottom: 20, borderRadius: 5, alignItems: 'center', justifyContent: 'center', margin: 15
-                    }} onPress={() => setTimeout(() => {
-                        this.scanner.reactivate()
-                    }, 2000)}>
-                        <Icon style={{ fontSize: 40 }} type="MaterialCommunityIcons" name="lock-reset" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        backgroundColor: MyColor.whiteTheme, width: 50, height: 50,
-                        marginBottom: 20, borderRadius: 5, alignItems: 'center', justifyContent: 'center', margin: 15
-                    }} onPress={() => this.setState({ flashOn: !this.state.flashOn })}>
-                        <Icon style={{ fontSize: 40 }} type="FontAwesome" name="flash" />
-                    </TouchableOpacity>
-                </View>
-            </View>
+                        <View style={{ flexDirection: "row" }}>
+                            <View style={styles.leftAndRightOverlay} />
+
+                            <View style={styles.rectangle}>
+                                {/* <Icon
+                                    name="ios-qr-scanner"
+                                    size={SCREEN_WIDTH * 0.73}
+                                    color={iconScanColor}
+                                /> */}
+                                {/* <Animatable.View
+                                    style={styles.scanBar}
+                                    direction="alternate-reverse"
+                                    iterationCount="infinite"
+                                    duration={1700}
+                                    easing="linear"
+                                    animation={this.makeSlideOutTranslation(
+                                        "translateY",
+                                        SCREEN_WIDTH * -0.54
+                                    )}
+                                /> */}
+                            </View>
+
+                            <View style={styles.leftAndRightOverlay} />
+                        </View>
+
+                        <View style={styles.bottomOverlay} />
+                    </View>
+                }
+            />
         )
     }
 }
-const styles = StyleSheet.create({
-    centerText: {
+const overlayColor = "rgba(0,0,0,0.5)"; // this gives us a black color with a 50% transparency
+
+const rectDimensions = SCREEN_WIDTH * 0.65; // this is equivalent to 255 from a 393 device width
+const rectBorderWidth = SCREEN_WIDTH * 0.005; // this is equivalent to 2 from a 393 device width
+const rectBorderColor = "red";
+
+const scanBarWidth = SCREEN_WIDTH * 0.46; // this is equivalent to 180 from a 393 device width
+const scanBarHeight = SCREEN_WIDTH * 0.0025; //this is equivalent to 1 from a 393 device width
+const scanBarColor = "#22ff00";
+
+const iconScanColor = "blue";
+
+const styles = {
+    rectangleContainer: {
         flex: 1,
-        fontSize: 18,
-        padding: 32,
-        color: '#777'
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "transparent"
     },
-    textBold: {
-        fontWeight: '500',
-        color: '#000'
+
+    rectangle: {
+        height: rectDimensions,
+        width: rectDimensions,
+        borderWidth: rectBorderWidth,
+        borderColor: rectBorderColor,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "transparent"
     },
-    buttonText: {
-        fontSize: 21,
-        color: 'transparent'
+
+    topOverlay: {
+        flex: 1,
+        height: SCREEN_WIDTH,
+        width: SCREEN_WIDTH,
+        backgroundColor: overlayColor,
+        justifyContent: "center",
+        alignItems: "center"
     },
-    buttonTouchable: {
-        padding: 16
+
+    bottomOverlay: {
+        flex: 1,
+        height: SCREEN_WIDTH,
+        width: SCREEN_WIDTH,
+        backgroundColor: overlayColor,
+        paddingBottom: SCREEN_WIDTH * 0.25
+    },
+
+    leftAndRightOverlay: {
+        height: SCREEN_WIDTH * 0.65,
+        width: SCREEN_WIDTH,
+        backgroundColor: overlayColor
+    },
+
+    scanBar: {
+        width: scanBarWidth,
+        height: scanBarHeight,
+        backgroundColor: scanBarColor
     }
-});
+};
+

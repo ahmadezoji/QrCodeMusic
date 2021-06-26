@@ -10,12 +10,13 @@ export default class Help extends React.Component {
         this.state = {
         };
     }
-    componentDidMount() {
+    componsudoentDidMount() {
     }
     render() {
         return (
-            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: MyColor.blackTheme }}>
-                <StatusBar translucent backgroundColor="transparent" />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: MyColor.whiteTheme }}>
+                {/* <StatusBar translucent backgroundColor="transparent" /> */}
+                <Image style={{ height: '75%',width:'90%', borderRadius: 20, resizeMode: 'contain' }} source={require('../assets/public/wizard1.png')} ></Image>
             </View>
         )
     }

@@ -7,4 +7,6 @@ export const MyColor ={
     blackTheme : '#8C0303',
     whiteTheme : '#E6E6E5',
     newColor : '#E6E6E5',
+    borderTab: '#b2d4db',
+    backCard : '#D3D3D3'
 };
