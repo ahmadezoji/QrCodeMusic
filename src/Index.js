@@ -2,9 +2,14 @@ import React, { Component } from 'react';
 import 'react-native-gesture-handler';
 import { createBottomTabNavigator, createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
-import { View, Text, TouchableOpacity, Image, PermissionsAndroid } from 'react-native';
+import { View, Text, TouchableOpacity, Image, PermissionsAndroid, Animated, Easing } from 'react-native';
 import { Icon } from 'native-base';
-import { createStackNavigator } from 'react-navigation-stack';
+import {
+    createStackNavigator, TransitionPresets, HeaderStyleInterpolators,
+    StackCardInterpolationProps,
+    StackNavigationOptions,
+    TransitionSpecs,
+} from 'react-navigation-stack';
 import { createDrawerNavigator } from 'react-navigation-drawer';
 import DrawerLayout from './components/DrawerLayout';
 import Scanner from './components/Scanner';
@@ -22,6 +27,8 @@ import ContactUs from './components/Info';
 import Wizard1 from './components/wizards/Wizard1';
 import Wizard2 from './components/wizards/Wizard2';
 import Wizard3 from './components/wizards/Wizard3';
+
+import { fromLeft, fromRight } from 'react-navigation-transitions';
 // import Toast from 'react-native-toast-message';
 const askPermission = async () => {
     console.log("asking permission");
@@ -47,7 +54,7 @@ const shareToFiles = async (link) => {
     const shareOptions = {
         title: 'Share file',
         failOnCancel: false,
-        urls: ['file://'+link]
+        urls: ['file://' + link]
     };
     // If you want, you can use a try catch, to parse
     // the share response. If the user cancels, etc.
@@ -59,7 +66,48 @@ const shareToFiles = async (link) => {
         // setResult('error: '.concat(getErrorString(error)));
     }
 };
-
+const MyTransition = {
+    gestureDirection: 'horizontal',
+    transitionSpec: {
+        open: TransitionSpecs.TransitionIOSSpec,
+        close: TransitionSpecs.TransitionIOSSpec,
+    },
+    headerStyleInterpolator: HeaderStyleInterpolators.forFade,
+    cardStyleInterpolator: ({ current, next, layouts }) => {
+        return {
+            cardStyle: {
+                transform: [
+                    {
+                        translateX: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [layouts.screen.width, 0],
+                        }),
+                    },
+                    {
+                        rotate: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ["180deg", "0deg"],
+                        }),
+                    },
+                    {
+                        scale: next
+                            ? next.progress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [1, 0.9],
+                            })
+                            : 1,
+                    },
+                ],
+            },
+            overlayStyle: {
+                opacity: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0.5],
+                }),
+            },
+        };
+    },
+}
 const PlayerStack = createStackNavigator(
     {
         'player': Player,
@@ -69,47 +117,51 @@ const PlayerStack = createStackNavigator(
             headerTitle: '',
             headerTransparent: true,
             headerTintColor: "white",
+            //(navigation.state.params.downloadUri !== 'startLoading') &&
             headerRight: () => (
-                <TouchableOpacity onPress={() => {
-                    if (navigation.state.params.downloadUri !== 'startLoading') {
+                <Icon
+                    name="share-alternative"
+                    type="Entypo"
+                    fontSize={25}
+                    style={{ marginRight: 10, color: 'white' }}
+                    onPress={() => {
+                        if (navigation.state.params.downloadUri !== 'startLoading') {
+                            console.log('from root : ', navigation.state.params.downloadUri);
+                            shareToFiles(navigation.state.params.downloadUri);
+                        } else {
+                            // Toast.show({
+                            //     text1: 'Hello',
+                            //     text2: 'This is some something 👋'
+                            //   }); 
+                        }
 
-                        console.log('from root : ', navigation.state.params.downloadUri);
-                        shareToFiles(navigation.state.params.downloadUri);
-                    }else{
-                        // Toast.show({
-                        //     text1: 'Hello',
-                        //     text2: 'This is some something 👋'
-                        //   }); 
-                    }
+                    }}
 
-                }}>
-                    <Icon
-                        name="share-alternative"
-                        type="Entypo"
-                        fontSize={25}
-                        style={{ marginRight: 10, color: 'white' }}
-                        solid={'#1B0A34'}
-
-                    />
-                </TouchableOpacity>
+                />
             ),
+
         }),
     }
 );
 const StoreStack = createStackNavigator(
     {
-        'store': Store,
+        store: {
+            screen: Store,
+        },
     },
     {
         defaultNavigationOptions: {
             headerShown: true,
             headerTitle: "فروشگاه",
-            // headerTransparent: true,
-            // headerTintColor: "white",
-            headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' }
+            headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' },
+           
+
         },
-    }
+        initialRouteName: 'store',
+    },
 );
+
+
 const HelpStack = createStackNavigator(
     {
         'help': Help,
@@ -127,8 +179,9 @@ const HelpStack = createStackNavigator(
                     />
                 </TouchableOpacity>
             ),
+           
         }),
-    }
+    },
 );
 const ScannerStack = createStackNavigator(
     {
@@ -153,24 +206,6 @@ const HomeStack = createStackNavigator(
         defaultNavigationOptions: ({ navigation }) => ({
             headerTitle: '',
             headerShown: false,
-            // headerRight: () => (
-            //     <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
-            //         <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-            //             <Icon name="md-menu"
-            //                 style={{ margin: 10, color: 'black' }}
-            //             />
-            //         </TouchableOpacity>
-            //     </View>
-            // ),
-            // headerLeft: () => (
-            //     <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-            //         <View style={{ flex: 1, flexDirection: 'row' }}>
-            //             <Image style={{ height: 40, width: 120, resizeMode: 'contain', margin: 10 }}
-            //                 source={require('../src/assets/public/logotype.png')} >
-            //             </Image>
-            //         </View>
-            //     </TouchableOpacity>
-            // ),
         }),
     }
 );
@@ -181,27 +216,55 @@ const ContactStack = createStackNavigator(
     {
         defaultNavigationOptions: {
             headerShown: true,
-            // headerTransparent: true,
-            // headerTintColor: "white",
             headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' },
             headerTitle: "ارتباط با ما",
+            
         },
-    }
+    },
+    {
+        initialRouteName: 'contact',
+    },
 );
+
+
 const WizardStack = createStackNavigator(
     {
-        'wizard1': Wizard1,
-        'wizard2': Wizard2,
-        'wizard3': Wizard3,
+        wizard1: {
+            screen: Wizard1,
+        },
+        wizard2: {
+            screen: Wizard2,
+        },
+        wizard3: {
+            screen: Wizard3,
+        },
     },
     {
         defaultNavigationOptions: {
             headerShown: false,
         },
-    }
+    },
+    {
+        initialRouteName: 'wizard1',
+
+    },
 );
 const TabNavigator = createMaterialBottomTabNavigator(
     {
+        Home: {
+            screen: HomeStack,
+            navigationOptions: {
+                tabBarLabel: 'Home',
+                tabBarIcon: ({ tintColor }) => (
+                    <View>
+                        <Icon style={[{ fontSize: 20, color: tintColor }]} name={'home'} />
+                    </View>),
+                activeColor: 'black',
+
+                inactiveColor: MyColor.main_back,
+                barStyle: { backgroundColor: MyColor.whiteTheme },
+            }
+        },
         Scanner: {
             screen: ScannerStack,
             navigationOptions: {
@@ -215,20 +278,6 @@ const TabNavigator = createMaterialBottomTabNavigator(
                 barStyle: { backgroundColor: MyColor.whiteTheme },
             }
         },
-        Home: {
-            screen: HomeStack,
-            navigationOptions: {
-                tabBarLabel: 'Home',
-                tabBarIcon: ({ tintColor }) => (
-                    <View>
-                        <Icon style={[{ fontSize: 20, color: tintColor }]} name={'home'} />
-                    </View>),
-                activeColor: 'black',
-                inactiveColor:  MyColor.main_back,
-                barStyle: { backgroundColor: MyColor.whiteTheme },
-            }
-        },
-
         Help: {
             screen: HelpStack,
             navigationOptions: {
@@ -238,7 +287,7 @@ const TabNavigator = createMaterialBottomTabNavigator(
                         <Icon style={{ fontSize: 21, color: tintColor }} type="Entypo" name="info" />
                     </View>),
                 activeColor: 'black',
-                inactiveColor:  MyColor.main_back,
+                inactiveColor: MyColor.main_back,
                 barStyle: { backgroundColor: MyColor.whiteTheme },
             }
         },
@@ -270,6 +319,7 @@ const MainStack = createStackNavigator(
     {
         defaultNavigationOptions: {
             headerShown: false,
+            ...MyTransition,
         },
     }
 );
@@ -280,7 +330,7 @@ const RootNavigator = createSwitchNavigator({
 
 
 }, {
-    initialRouteName: 'Splash'
+    initialRouteName: 'Splash',
 });
 
 const Main = createAppContainer(RootNavigator);

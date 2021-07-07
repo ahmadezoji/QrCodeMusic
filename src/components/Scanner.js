@@ -5,9 +5,11 @@ import { RNCamera } from 'react-native-camera';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { MyColor } from './Colors';
 import * as Animatable from "react-native-animatable";
+import { NavigationEvents } from 'react-navigation';
+import LottieView from 'lottie-react-native';
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SCREEN_WIDTH = Dimensions.get("window").width;
-
+import Toast from 'react-native-simple-toast';
 console.disableYellowBox = true;
 export default class Scanner extends React.Component {
     constructor(props) {
@@ -19,13 +21,20 @@ export default class Scanner extends React.Component {
         };
     }
     onSuccess = e => {
+        Toast.show(e.data);
         this.props.navigation.navigate('player', { link: e.data });
-        alert(e.data)
-        setTimeout(() => {
-            this.scanner.reactivate();
-        }, 6000);
-        // alert(e.data);
+
     };
+    onFocusFunction = () => {
+        if (this.scanner)
+            this.scanner.reactivate();
+    }
+    // add a focus listener onDidMount
+    async componentDidMount() {
+        this.focusListener = this.props.navigation.addListener('didFocus', () => {
+            this.onFocusFunction()
+        })
+    }
     makeSlideOutTranslation(translationType, fromValue) {
         return {
             from: {
@@ -49,13 +58,14 @@ export default class Scanner extends React.Component {
                         <View style={styles.topOverlay}>
                             <Text style={{ fontSize: 25, color: "white" }}>
                                 QR CODE
-                  </Text>
+                            </Text>
                         </View>
 
                         <View style={{ flexDirection: "row" }}>
                             <View style={styles.leftAndRightOverlay} />
 
                             <View style={styles.rectangle}>
+                                <LottieView style={{ height: '100%', width: '100%' }} source={require('../assets/public/scanner.json')} autoPlay loop />
                                 {/* <Icon
                                     name="ios-qr-scanner"
                                     size={SCREEN_WIDTH * 0.73}
@@ -107,8 +117,8 @@ const styles = {
     rectangle: {
         height: rectDimensions,
         width: rectDimensions,
-        borderWidth: rectBorderWidth,
-        borderColor: rectBorderColor,
+        // borderWidth: rectBorderWidth,
+        // borderColor: rectBorderColor,
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "transparent"
