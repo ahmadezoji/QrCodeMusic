@@ -2,8 +2,6 @@ import { Icon } from 'native-base';
 import React from 'react';
 import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator, TouchableOpacity, Linking, Text, StyleSheet } from 'react-native';
 import { MyColor } from './Colors';
-import MapboxGL from "@react-native-mapbox-gl/maps";
-MapboxGL.setAccessToken("pk.eyJ1IjoiYWhtYWQtZXpvamkiLCJhIjoiY2s4bXlmc3RhMDczaTNob3c2YTF0a3YwdyJ9.xk8OyD77TanRLKtKqal1rQ");
 export default class ContactUs extends React.Component {
     constructor(props) {
         super(props);
@@ -32,9 +30,6 @@ export default class ContactUs extends React.Component {
                     <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Bold', textAlign: 'center' }}>روزهای کاری</Text>
                     <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>شنبه ها از ساعت ۸ الی ۱۴</Text>
                     <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>شنبه ها از ساعت ۸ الی ۱۴</Text>
-                </View>
-                <View style={{ width: '90%', height: '25%', borderRadius: 12, margin: 5, backgroundColor: MyColor.backCard, padding: 5 }}>
-                    <MapboxGL.MapView style={{flex:1}} />
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '90%', height: '15%', borderRadius: 12, margin: 5, backgroundColor: MyColor.backCard, padding: 5 }}>
                     <Icon name="instagram"

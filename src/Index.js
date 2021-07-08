@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import 'react-native-gesture-handler';
-import { createBottomTabNavigator, createAppContainer, createSwitchNavigator } from 'react-navigation';
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
-import { View, Text, TouchableOpacity, Image, PermissionsAndroid, Animated, Easing } from 'react-native';
+import { createBottomTabNavigator, BottomTabBar } from 'react-navigation-tabs';
+import { View, Text, TouchableOpacity, Image, PermissionsAndroid, Animated, Easing, Dimensions } from 'react-native';
 import { Icon } from 'native-base';
 import {
     createStackNavigator, TransitionPresets, HeaderStyleInterpolators,
@@ -30,44 +31,8 @@ import Wizard3 from './components/wizards/Wizard3';
 
 import { fromLeft, fromRight } from 'react-navigation-transitions';
 // import Toast from 'react-native-toast-message';
-const askPermission = async () => {
-    console.log("asking permission");
-    const granted = await PermissionsAndroid.check(
-        "android.permission.READ_EXTERNAL_STORAGE"
-    );
-    if (!granted) {
-        console.log("Permission not granted");
-        const response = await PermissionsAndroid.request(
-            "android.permission.READ_EXTERNAL_STORAGE"
-        );
-        if (!response) {
-            console.log("Permission not granted & non respinse");
-            return;
-        }
-    } else {
-        console.log("Permission granted");
-    }
-};
-
-const shareToFiles = async (link) => {
-    askPermission();
-    const shareOptions = {
-        title: 'Share file',
-        failOnCancel: false,
-        urls: ['file://' + link]
-    };
-    // If you want, you can use a try catch, to parse
-    // the share response. If the user cancels, etc.
-    try {
-        const ShareResponse = await Share.open(shareOptions);
-        // setResult(JSON.stringify(ShareResponse, null, 2));
-    } catch (error) {
-        console.log('Error =>', error);
-        // setResult('error: '.concat(getErrorString(error)));
-    }
-};
-const MyTransition = {
-    gestureDirection: 'horizontal',
+const MyTransitionToDown = {
+    gestureDirection: 'vertical',
     transitionSpec: {
         open: TransitionSpecs.TransitionIOSSpec,
         close: TransitionSpecs.TransitionIOSSpec,
@@ -78,25 +43,54 @@ const MyTransition = {
             cardStyle: {
                 transform: [
                     {
+                        translateY: current.progress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [layouts.screen.height, 0],
+                        }),
+                    },
+                ],
+            },
+            overlayStyle: {
+                opacity: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0.5],
+                }),
+            },
+        };
+    },
+}
+const MyTransitionToLeft = {
+    gestureDirection: 'horizontal',
+    transitionSpec: {
+        open: TransitionSpecs.TransitionIOSSpec,
+        close: TransitionSpecs.TransitionIOSSpec,
+    },
+    headerStyleInterpolator: HeaderStyleInterpolators.forFade,
+
+    cardStyleInterpolator: ({ current, next, layouts }) => {
+        return {
+            cardStyle: {
+                transform: [
+                    {
                         translateX: current.progress.interpolate({
                             inputRange: [0, 1],
                             outputRange: [layouts.screen.width, 0],
                         }),
                     },
-                    {
-                        rotate: current.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ["180deg", "0deg"],
-                        }),
-                    },
-                    {
-                        scale: next
-                            ? next.progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [1, 0.9],
-                            })
-                            : 1,
-                    },
+                    // {
+                    //     rotate: current.progress.interpolate({
+                    //         inputRange: [0, 1],
+                    //         outputRange: ["180deg", "0deg"],
+                    //     }),
+                    // },
+                    // {
+                    //     scale: next
+                    //         ? next.progress.interpolate({
+                    //             inputRange: [0, 1],
+                    //             outputRange: [1, 0.9],
+                    //         })
+                    //         : 1,
+                    // },
                 ],
             },
             overlayStyle: {
@@ -110,38 +104,17 @@ const MyTransition = {
 }
 const PlayerStack = createStackNavigator(
     {
-        'player': Player,
+        player: {
+            screen: Player,
+            navigationOptions: {
+                headerTitle: '',
+                headerTransparent: true,
+                headerTintColor: "white",
+                headerShown: false,
+                ...MyTransitionToLeft
+            }
+        },
     },
-    {
-        defaultNavigationOptions: ({ navigation }) => ({
-            headerTitle: '',
-            headerTransparent: true,
-            headerTintColor: "white",
-            //(navigation.state.params.downloadUri !== 'startLoading') &&
-            headerRight: () => (
-                <Icon
-                    name="share-alternative"
-                    type="Entypo"
-                    fontSize={25}
-                    style={{ marginRight: 10, color: 'white' }}
-                    onPress={() => {
-                        if (navigation.state.params.downloadUri !== 'startLoading') {
-                            console.log('from root : ', navigation.state.params.downloadUri);
-                            shareToFiles(navigation.state.params.downloadUri);
-                        } else {
-                            // Toast.show({
-                            //     text1: 'Hello',
-                            //     text2: 'This is some something 👋'
-                            //   }); 
-                        }
-
-                    }}
-
-                />
-            ),
-
-        }),
-    }
 );
 const StoreStack = createStackNavigator(
     {
@@ -154,7 +127,7 @@ const StoreStack = createStackNavigator(
             headerShown: true,
             headerTitle: "فروشگاه",
             headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' },
-           
+
 
         },
         initialRouteName: 'store',
@@ -179,7 +152,7 @@ const HelpStack = createStackNavigator(
                     />
                 </TouchableOpacity>
             ),
-           
+
         }),
     },
 );
@@ -218,7 +191,7 @@ const ContactStack = createStackNavigator(
             headerShown: true,
             headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' },
             headerTitle: "ارتباط با ما",
-            
+
         },
     },
     {
@@ -249,6 +222,91 @@ const WizardStack = createStackNavigator(
 
     },
 );
+const CustomBottomBar = (props) => {
+    //We use the spread operator to pass down all default properties of a bottom bar
+
+    //custom styles for our indicator
+    //The width of the indicator should be of equal size with each tab button. We have 3 tab buttons therefore, the width of a single tab button would be the total width Dimension of the screen divided by 3
+
+    const { width } = Dimensions.get('screen')
+
+    //Create an animated value 
+    const [position] = useState(new Animated.ValueXY())
+
+    //We attach the x,y coordinates of the position to the transform property of the indicator so we can freely animate it to any position of our choice.
+    const animStyles = {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: width / 3,
+        backgroundColor: MyColor.main_back,
+        transform: position.getTranslateTransform()
+    }
+
+    const animate = (value, route) => {
+        //navigate to the selected route on click
+        props.navigation.navigate(route)
+
+        //animate indicator
+        Animated.timing(position, {
+            toValue: { x: value, y: 0 },
+            duration: 300,
+            useNativeDriver: true
+        }).start()
+    }
+
+    return (
+        <View>
+            <Animated.View style={animStyles} />
+            <BottomTabBar {...props} onTabPress={({ route }) => {
+                switch (route.key) {
+                    case 'Home':
+                        //animated position should be 0
+                        animate(0, route.key)
+                        break
+                    case 'Scanner':
+                        //animated position is width/3
+                        animate(width / 3, route.key)
+                        break
+                    case 'Help':
+                        //animated position is width of screen minus width of single tab button
+                        animate(width - (width / 3), route.key)
+                        break
+                }
+            }} style={{ backgroundColor: 'transparent' }} />
+        </View>
+    )
+}
+
+const config = {
+
+    tabBarOptions: {
+        activeTintColor: '#fff',
+        inactiveTintColor: 'rgba(0,0,0,0.7)',
+    },
+    tabBarComponent: (props) => <CustomBottomBar {...props} />
+}
+const bottomComponent = createBottomTabNavigator({
+    Home: {
+        screen: HomeStack,
+        navigationOptions: {
+            tabBarIcon: ({ tintColor }) => <Icon style={[{ fontSize: 20, color: tintColor }]} name={'home'} />
+        }
+    },
+    Scanner: {
+        screen: ScannerStack,
+        navigationOptions: {
+            tabBarIcon: ({ tintColor }) => <Icon style={[{ fontSize: 21, color: tintColor }]} name={'scan'} />
+        }
+    },
+    Help: {
+        screen: HelpStack,
+        navigationOptions: {
+            tabBarIcon: ({ tintColor }) => <Icon style={{ fontSize: 21, color: tintColor }} type="Entypo" name="info" />
+        }
+    }
+}, config)
 const TabNavigator = createMaterialBottomTabNavigator(
     {
         Home: {
@@ -301,7 +359,7 @@ const TabNavigator = createMaterialBottomTabNavigator(
 );
 const DrawerNavigator = createDrawerNavigator(
     {
-        screen: TabNavigator,
+        screen: bottomComponent,
     },
     {
         contentComponent: props => <DrawerLayout {...props} />,
@@ -310,24 +368,64 @@ const DrawerNavigator = createDrawerNavigator(
 );
 const MainStack = createStackNavigator(
     {
-        'Main': DrawerNavigator,
-        'Player': PlayerStack,
-        'Store': StoreStack,
-        'Contact': ContactStack,
-        'Wizards': WizardStack
+        'Main': bottomComponent,
+        player: {
+            screen: Player,
+            navigationOptions: {
+                headerTitle: '',
+                headerTransparent: true,
+                headerTintColor: "white",
+                headerShown: false,
+                ...MyTransitionToDown
+            }
+        },
+        store: {
+            screen: Store,
+            navigationOptions: {
+                headerShown: true,
+                headerTitle: "فروشگاه",
+                headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' },
+                ...MyTransitionToLeft
+            }
+        },
+        contact: {
+            screen: ContactUs,
+            navigationOptions: {
+                headerShown: true,
+                headerTitleStyle: { fontFamily: 'IRANSansMobile_Bold' },
+                headerTitle: "ارتباط با ما",
+                ...MyTransitionToLeft
+            }
+        },
+        wizard1: {
+            screen: Wizard1,
+            navigationOptions: {
+                ...MyTransitionToLeft
+            }
+        },
+        wizard2: {
+            screen: Wizard2,
+            navigationOptions: {
+                ...MyTransitionToLeft
+            }
+        },
+        wizard3: {
+            screen: Wizard3,
+            navigationOptions: {
+                ...MyTransitionToLeft
+            }
+        },
     },
     {
         defaultNavigationOptions: {
             headerShown: false,
-            ...MyTransition,
+
         },
     }
 );
 const RootNavigator = createSwitchNavigator({
     'Splash': Splash,
     'Main': MainStack,
-
-
 
 }, {
     initialRouteName: 'Splash',

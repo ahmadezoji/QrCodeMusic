@@ -28,7 +28,7 @@ export default class Splash extends React.Component {
             this.setState({ show: false })
             Animated.timing(this.state.top, {
                 toValue: 35,
-                duration: 500,
+                duration: 1000,
                 easing: Easing.linear,
                 useNativeDriver: false,
             }).start(() => {
@@ -53,15 +53,15 @@ export default class Splash extends React.Component {
         return (
             <View style={{ flex: 1, flexDirection: 'column-reverse', alignItems: 'center', backgroundColor: 'black' }}>
                 <StatusBar translucent backgroundColor="transparent" />
-                <Image style={{ height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-                    source={require('../assets/public/player.gif')} />
-                {/* <LottieView  source={require('../assets/public/circular-audio-spectrum.json')} autoPlay loop /> */}
+                {/* <Image style={{ height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                    source={require('../assets/public/player.gif')} /> */}
+                <LottieView   resizeMode={'center'} source={require('../assets/public/spectrum2.json')} autoPlay loop />
                 <Animated.View style={AnimatedStyles}>
                     <Text style={{ textAlign: 'center', color: 'white', fontSize: 25, fontWeight: 'bold' }}>Musice scanner</Text>
                     <Text style={{ textAlign: 'center', color: 'white', fontSize: 10 }}>v 1.0.2</Text>
                 </Animated.View>
 
-                {this.state.show && <ActivityIndicator size={30} color='red' />}
+                {/* {this.state.show && <ActivityIndicator size={30} color='red' />} */}
             </View>
         )
     }

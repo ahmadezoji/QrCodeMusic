@@ -1,26 +1,59 @@
 import React from 'react';
-import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator } from 'react-native';
+import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator, TouchableOpacity, PermissionsAndroid, BackHandler } from 'react-native';
+
+import { Container, Header, Icon } from 'native-base';
 import { AudioControls } from 'react-native-hue-player';
 import MusicControl from 'react-native-music-control';
 import RNFetchBlob from 'rn-fetch-blob';
 import { MyColor } from './Colors';
 const { config, fs } = RNFetchBlob
 import Toast from 'react-native-simple-toast';
+import Share from 'react-native-share';
 
-const DownloadDir = fs.dirs.DownloadDir; // this is the pictures directory. You can check the available directories in the wiki.
-const defaultMusic = [
-    {
-        key: 'audio01',
-        title: 'Sample track',
-        url: 'https://s19.picofile.com/d/8437107584/3dbe7abd-a74a-4f30-9ae4-defb4276f549/10991.mp3',
-        author: 'Sample album',
-        thumbnailUri: 'https://f5s3r6h9.rocketcdn.me/wp-content/uploads/2019/11/free_qr_code_generator_toronto.jpg'
+import LottieView from 'lottie-react-native';
+
+const askPermission = async () => {
+    console.log("asking permission");
+    const granted = await PermissionsAndroid.check(
+        "android.permission.READ_EXTERNAL_STORAGE"
+    );
+    if (!granted) {
+        console.log("Permission not granted");
+        const response = await PermissionsAndroid.request(
+            "android.permission.READ_EXTERNAL_STORAGE"
+        );
+        if (!response) {
+            console.log("Permission not granted & non respinse");
+            return;
+        }
+    } else {
+        console.log("Permission granted");
     }
-]
+};
+
+const shareToFiles = async (link) => {
+    askPermission();
+    const shareOptions = {
+        title: 'Share file',
+        failOnCancel: false,
+        urls: ['file://' + link]
+    };
+    // If you want, you can use a try catch, to parse
+    // the share response. If the user cancels, etc.
+    try {
+        const ShareResponse = await Share.open(shareOptions);
+        // setResult(JSON.stringify(ShareResponse, null, 2));
+    } catch (error) {
+        console.log('Error =>', error);
+        // setResult('error: '.concat(getErrorString(error)));
+    }
+};
+const DownloadDir = fs.dirs.DownloadDir; // this is the pictures directory. You can check the available directories in the wiki.
 export default class Player extends React.Component {
     constructor(props) {
         super(props);
-        this.player = null
+        this.player = null,
+            this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         this.state = {
             playlistSample: [
                 {
@@ -31,35 +64,51 @@ export default class Player extends React.Component {
                     thumbnailUri: 'https://f5s3r6h9.rocketcdn.me/wp-content/uploads/2019/11/free_qr_code_generator_toronto.jpg'
                 }
             ],
-            prefixString: 'https://s19.picofile.com/d/8437107584/3dbe7abd-a74a-4f30-9ae4-defb4276f549/',
-            update: false
+            prefixString: 'https://s19.picofile.com/d/8437107584/4904bc1c-9d66-495e-bfbd-0673e3b13453/',
+            downloadUri: 'none'
         };
     }
     componentDidMount() {
-        this.props.navigation.setParams({
-            downloadUri: 'startLoading',
-        })
         this.loadMusic();
     }
+
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+    handleBackButtonClick() {
+        this.props.navigation.navigate('Home')
+        return true;
+    }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
     async loadMusic() {
-        let fileName = await this.props.navigation.state.params.link;
-        // fileName = '27676ms';
-        // 27676ms
-        console.log('fileName: ' + fileName);
-        if (fileName !== undefined && fileName !== null) {
+        let data = await this.props.navigation.state.params.link;
+        if (data !== undefined && data !== null) {
             let playlistSample = await [...this.state.playlistSample];
-            let isUrl = String(fileName).includes('http') || String(fileName).includes('www');
+            let isUrl = String(data).includes('http') || String(data).includes('www');
             let index = await playlistSample.findIndex(el => el.url === 'none');
-            playlistSample[index] = await { ...playlistSample[index], url: isUrl ? fileName : this.state.prefixString + fileName + '.mp3' };
+            playlistSample[index] = await { ...playlistSample[index], url: isUrl ? data : this.state.prefixString + data + '.mp3' };
             await this.setState({ playlistSample });
 
-            // this.downloadFile(fileName);
+
+            if (isUrl == false)
+                this.downloadFile(data);
+            else {
+                this.downloadFile(this.GetFilename(data))
+            }
 
         }
-
-
-
-
+    }
+    GetFilename(url) {
+        if (url) {
+            let m = url.toString().match(/.*\/(.+?)\./);
+            if (m && m.length > 1) {
+                return m[1];
+            }
+        }
+        return "";
     }
     downloadFile(fileName) {
         let options = {
@@ -74,21 +123,18 @@ export default class Player extends React.Component {
         fs.exists(options.addAndroidDownloads.path).then((val) => {
             console.log(val ? options.addAndroidDownloads.path : 'this file not exist');
             if (val) {
-                this.props.navigation.setParams({
-                    downloadUri: options.addAndroidDownloads.path,
-                })
+                Toast.show(options.addAndroidDownloads.path);
+                this.setState({ downloadUri: options.addAndroidDownloads.path });
             } else {
+                Toast.show('downloading...');
                 config(options).fetch('GET', String(this.state.playlistSample[0].url)).
                     progress({ interval: 0 }, (received, total) => {
                         let downloadProgress = ((received / total) * 100).toFixed(0)
                         console.log(downloadProgress);
                     }).
                     then((res) => {
-                        console.log(options.addAndroidDownloads.path);
-                        // this.props.navigation.state.params.downloadUri = options.addAndroidDownloads.path;
-                        this.props.navigation.setParams({
-                            downloadUri: options.addAndroidDownloads.path,
-                        })
+                        Toast.show('download finished');
+                        this.setState({ downloadUri: options.addAndroidDownloads.path });
                     })
             }
 
@@ -98,6 +144,25 @@ export default class Player extends React.Component {
     }
     render() {
         let playerView = null;
+        let iconHeader = null;
+        if (this.state.downloadUri !== 'none') {
+            iconHeader =
+                <TouchableOpacity onPress={() => {
+                    shareToFiles(this.state.downloadUri);
+                }}>
+                    <Icon
+                        name="share-alternative"
+                        type="Entypo"
+                        fontSize={25}
+                        style={{ marginRight: 10, color: 'white' }}
+                    />
+                </TouchableOpacity>
+        } else {
+            iconHeader = (
+                <LottieView style={{ height: 30, width: 30 }} source={require('../assets/public/download.json')} autoPlay loop />
+            )
+        }
+
         if (this.state.playlistSample[0].url !== 'none')
             playerView = (<AudioControls
                 ref={(ref) => this.player = ref}
@@ -107,22 +172,27 @@ export default class Player extends React.Component {
                 hasButtonSkipSeconds
                 timeToSkip={30}
             />);
-        // ) : (
-        //     console.log('orginal'),
-        //     <AudioControls
-        //         ref={(ref) => this.player = ref}
-        //         activeColor={'white'}
-        //         initialTrack={0} // starts on second audio file
-        //         playlist={this.state.playlistSample}
-        //         hasButtonSkipSeconds
-        //         timeToSkip={30}
-        //     />
-        // );
+
         return (
-            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: MyColor.blackTheme }}>
-                <StatusBar translucent backgroundColor="transparent" />
+            <Container style={{ backgroundColor: MyColor.blackTheme }}>
+                <Header style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: MyColor.main_back }} androidStatusBarColor="black"
+                    iosBarStyle="light-content">
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                        <TouchableOpacity onPress={() => (
+                            this.props.navigation.navigate('Home')
+                        )
+                        }>
+                            <Icon name="down"
+                                type="AntDesign"
+                                style={{ margin: 10, color: 'white', fontSize: 20 }}
+                            />
+                        </TouchableOpacity>
+                        {iconHeader}
+                    </View>
+                </Header>
                 {playerView}
-            </View>
+            </Container >
         )
     }
 }
