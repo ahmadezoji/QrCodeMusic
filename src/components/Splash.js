@@ -12,8 +12,9 @@ export default class Splash extends React.Component {
     }
     async navigate() {
         let index = await AsyncStorage.getItem('wizard');
+        console.log(index);
         if (index == "3")
-            this.props.navigation.navigate('Home');
+            this.props.navigation.navigate('main');
         else {
             if (index == "0" || index == null)
                 this.props.navigation.navigate('wizard1');
@@ -23,7 +24,7 @@ export default class Splash extends React.Component {
                 this.props.navigation.navigate('wizard3');
         }
     }
-    componentDidMount() {
+    async componentDidMount() {
         setTimeout(() => {
             this.setState({ show: false })
             Animated.timing(this.state.top, {
@@ -52,7 +53,7 @@ export default class Splash extends React.Component {
         ];
         return (
             <View style={{ flex: 1, flexDirection: 'column-reverse', alignItems: 'center', backgroundColor: 'black' }}>
-                <StatusBar translucent backgroundColor="transparent" />
+                 <StatusBar translucent backgroundColor='transparent' />
                 {/* <Image style={{ height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                     source={require('../assets/public/player.gif')} /> */}
                 <LottieView   resizeMode={'center'} source={require('../assets/public/spectrum2.json')} autoPlay loop />

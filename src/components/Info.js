@@ -1,79 +1,185 @@
-import { Icon } from 'native-base';
-import React from 'react';
-import { StatusBar, AsyncStorage, Image, Dimensions, View, ActivityIndicator, TouchableOpacity, Linking, Text, StyleSheet } from 'react-native';
-import { MyColor } from './Colors';
-export default class ContactUs extends React.Component {
-    constructor(props) {
-        super(props);
-        this.scanner = null
-        this.state = {
-            viewport: {
-                latitude: 37.7577,
-                longitude: -122.4376,
-                zoom: 8
-            }
-        };
-    }
-    componentDidMount() {
-    }
-    render() {
-        return (
-            <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', backgroundColor: MyColor.whiteTheme }}>
-                <View style={{ width: '90%', height: '30%', borderRadius: 12, margin: 5, backgroundColor: MyColor.backCard, padding: 5 }}>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Bold', textAlign: 'center' }}>تماس</Text>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>تلفن ۱: ۲۴۲۴۲۵۲</Text>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>تلفن ۱: ۲۴۲۴۲۵۲</Text>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>کد پستی: ۲۴۲۴۲۵۲</Text>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>تهران خیابان پونک سجاجید پلا ۹</Text>
-                </View>
-                <View style={{ width: '90%', height: '25%', borderRadius: 12, margin: 5, backgroundColor: MyColor.backCard, padding: 5 }}>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Bold', textAlign: 'center' }}>روزهای کاری</Text>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>شنبه ها از ساعت ۸ الی ۱۴</Text>
-                    <Text style={{ color: MyColor.main_back, fontFamily: 'IRANSansMobile_Light', textAlign: 'center' }}>شنبه ها از ساعت ۸ الی ۱۴</Text>
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '90%', height: '15%', borderRadius: 12, margin: 5, backgroundColor: MyColor.backCard, padding: 5 }}>
-                    <Icon name="instagram"
-                        type="FontAwesome"
-                        style={{ margin: 10, color: MyColor.main_back, fontSize: 40 }}
-                        onPress={() => {
-                            Linking.openURL('instagram://user?username=apple')
-                        }}
-                    />
-                    <Icon name="telegram"
-                        type="FontAwesome"
-                        style={{ margin: 10, color: MyColor.main_back, fontSize: 40 }}
-                        onPress={() => {
-                            Linking.openURL('telegram://')
-                        }}
-                    />
-                    <Icon name="twitter"
-                        type="FontAwesome"
-                        style={{ margin: 10, color: MyColor.main_back, fontSize: 40 }}
-                        onPress={() => {
-                            Linking.openURL('twitter://timeline')
-                        }}
-                    />
-                </View>
-            </View>
-        )
-    }
-}
-const styles = StyleSheet.create({
-    centerText: {
+import { Icon } from 'native-base'
+import React, { useState, useEffect } from 'react'
+import {
+  StatusBar,
+  AsyncStorage,
+  Image,
+  Dimensions,
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+  Linking,
+  Text,
+  StyleSheet,
+  Platform
+} from 'react-native'
+import FastImage from 'react-native-fast-image'
+import { SliderBox } from 'react-native-image-slider-box'
+import { MyColor } from './Colors'
+
+const Mycontact = ({ navigation }) => {
+  let [phone, setPhone] = useState([448899663, 222425336])
+  let [images, setImages] = useState([
+    require('../assets/public/slider-contact.jpg'),
+    require('../assets/public/slider-contact.jpg'),
+    require('../assets/public/slider-contact.jpg')
+  ])
+  let [address, setAddress] = useState(
+    'تهران پونک خیابان سجاجید پلاک ۱۵ واحد ۲'
+  )
+  const lat = 35.7544765
+  const lon = 51.318194
+  let [days, setDays] = useState([
+    'شنبه ها ساعت ۸−۱۴',
+    'دوشنبه ها ساعت ۸−۱۴',
+    'پنجشنبه ها ساعت ۸−۲۰'
+  ])
+  const openMap = () => {
+    const scheme = Platform.select({
+      ios: 'maps:0,0?q=',
+      android: 'geo:0,0?q='
+    })
+    const latLng = `${lat},${lon}`
+    const label = 'Scanner'
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`
+    })
+
+    Linking.openURL(url)
+  }
+  return (
+    <View
+      style={{
         flex: 1,
-        fontSize: 18,
-        padding: 32,
-        color: '#777'
-    },
-    textBold: {
-        fontWeight: '500',
-        color: '#000'
-    },
-    buttonText: {
-        fontSize: 21,
-        color: 'transparent'
-    },
-    buttonTouchable: {
-        padding: 16
-    }
-});
+        flexDirection: 'column',
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: 'red'
+      }}
+    >
+      <StatusBar translucent backgroundColor='transparent' />
+      <SliderBox
+        ImageComponent={FastImage}
+        images={images}
+        onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
+        dotColor='#FFEE58'
+        inactiveDotColor='#90A4AE'
+        paginationBoxVerticalPadding={5}
+        autoplay
+        circleLoop
+        resizeMethod={'resize'}
+        resizeMode={'cover'}
+        dotStyle={{
+          width: 10,
+          height: 10,
+          borderRadius: 5,
+          marginHorizontal: 0,
+          padding: 0,
+          margin: 0,
+          backgroundColor: 'rgba(128, 128, 128, 0.92)'
+        }}
+        ImageComponentStyle={{
+          height: 200
+        }}
+        imageLoadingColor='#2196F3'
+      />
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 2
+        }}
+      >
+        <Icon name={'map-marker'} type={'FontAwesome'} />
+        <TouchableOpacity onPress={() => openMap()}>
+          <Text style={{ color: 'blue', fontSize: 15 }}>Open Map</Text>
+        </TouchableOpacity>
+        <Text style={styles.textAddress}>{address}</Text>
+      </View>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 2
+        }}
+      >
+        <Icon name={'mobile'} type={'Entypo'} />
+
+        {phone.map(phone => (
+          <TouchableOpacity onPress={() => Linking.openURL(`tel:${phone}`)}>
+            <Text style={{ color: 'blue', fontSize: 15 }}>{phone}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 2
+        }}
+      >
+        <Icon name={'clock'} type={'Feather'} />
+        {days.map(item => (
+          <Text style={styles.textAddress} key={item}>
+            {item}
+          </Text>
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+        <Icon
+          name='instagram'
+          type='FontAwesome'
+          style={{ margin: 10, color: MyColor.main_back, fontSize: 40 }}
+          onPress={() => {
+            Linking.openURL('instagram://user?username=apple')
+          }}
+        />
+        <Icon
+          name='telegram'
+          type='FontAwesome'
+          style={{ margin: 10, color: MyColor.main_back, fontSize: 40 }}
+          onPress={() => {
+            Linking.openURL('telegram://')
+          }}
+        />
+        <Icon
+          name='twitter'
+          type='FontAwesome'
+          style={{ margin: 10, color: MyColor.main_back, fontSize: 40 }}
+          onPress={() => {
+            Linking.openURL('twitter://timeline')
+          }}
+        />
+      </View>
+    </View>
+  )
+}
+
+export { Mycontact }
+
+const styles = StyleSheet.create({
+  centerText: {
+    flex: 1,
+    fontSize: 18,
+    padding: 32,
+    color: '#777'
+  },
+  textBold: {
+    fontWeight: '500',
+    color: '#000'
+  },
+  buttonText: {
+    fontSize: 21,
+    color: 'transparent'
+  },
+  buttonTouchable: {
+    padding: 16
+  },
+  textAddress: {
+    color: 'black',
+    fontFamily: 'IRAMSansMobile',
+    fontSize: 17,
+    textAlign: 'center'
+  }
+})

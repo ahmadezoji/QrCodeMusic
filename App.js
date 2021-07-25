@@ -6,33 +6,27 @@
  * @flow strict-local
  */
 
-import React from 'react';
-
-import Main from './src/Index';
-import {NativeModules,DeviceEventEmitter,AppRegistry} from 'react-native';
-var Najva = NativeModules.NajvaModule;
-// const App: () => React$Node = () => {
-//   return (
-//    <Main/>
-//   );
-// };
-
-// export default App;
-
- 
+import React from 'react'
+import {
+  NativeModules,
+  DeviceEventEmitter,
+  AppRegistry,
+  View
+} from 'react-native'
+import Router from './src/Index'
+var Najva = NativeModules.NajvaModule
 export default class App extends React.Component {
-  constructor(props) {
-      super(props);
+  constructor (props) {
+    super(props)
+    this.tab = null
+    var API_KEY = '159e5187-af4c-4e3d-9e85-9cac41b566b6'
 
-      var API_KEY = "159e5187-af4c-4e3d-9e85-9cac41b566b6";
+    var WEBSITE_ID = 27752 // get this from najva panel setting
 
-      var WEBSITE_ID = 27752; // get this from najva panel setting
-
-      Najva.initializeNajva(API_KEY,WEBSITE_ID,true,false);
+    Najva.initializeNajva(API_KEY, WEBSITE_ID, true, false)
   }
-  render(){
-    return(
-      <Main/>
-    );
+  componentDidMount () {}
+  render () {
+    return <Router />
   }
 }

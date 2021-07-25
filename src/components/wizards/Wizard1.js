@@ -19,7 +19,7 @@ export default class Wizard1 extends React.Component {
         return (
             <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black' }}>
                 <Text style={{color:'white',fontSize:18,fontFamily:'IRANSansMobile_Bold'}}>دوربین را مقابل کد نگه دارید</Text>
-                <StatusBar translucent backgroundColor="transparent" />
+                <StatusBar translucent backgroundColor='transparent' />
                 <LottieView style={{ height: 300}} source={require('../../assets/public/qr-code-scanner.json')} autoPlay loop />
                 <View style={{ height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: 'transparent', flexDirection: 'row', marginTop: 10 }}>
                     <View style={{ borderWidth: 1, borderColor: 'white', margin: 15, width: 20, height: 20, backgroundColor: 'black', borderRadius: 10 }}></View>
